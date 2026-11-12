@@ -56,7 +56,6 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
       {/* meta row */}
       <FadeIn delay={0.1} y={-10} className="gutter relative z-20 flex justify-between pt-20 font-mono text-[10px] uppercase tracking-[0.22em] text-muted sm:pt-24 sm:text-[11px]">
         <span>{PROFILE.title}</span>
-        <span className="hidden sm:inline">Portfolio · {new Date().getFullYear()}</span>
         <span>{PROFILE.location}</span>
       </FadeIn>
 

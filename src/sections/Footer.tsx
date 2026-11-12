@@ -83,7 +83,6 @@ export function Footer() {
           style={{ borderColor: 'rgba(217,222,228,.1)' }}>
           <span>© {new Date().getFullYear()} {PROFILE.name}</span>
           <KochiTime />
-          <span>Built with React, TypeScript &amp; WebGL</span>
         </div>
       </div>
     </footer>

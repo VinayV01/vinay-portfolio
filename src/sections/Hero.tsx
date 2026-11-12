@@ -48,7 +48,7 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
   const portraitY = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
 
   return (
-    <section ref={ref} id="top" className="relative flex h-[100svh] min-h-[640px] flex-col overflow-hidden" aria-label="Introduction">
+    <section ref={ref} id="top" className="relative flex min-h-[max(100svh,640px)] flex-col overflow-hidden" aria-label="Introduction">
       <div className="hero-glow" />
       <div className="hero-grid" />
 
@@ -61,7 +61,7 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
       {/* name */}
       <motion.div style={{ y: headY, opacity: headO }} className="relative z-0 mt-3 overflow-hidden sm:mt-2">
         <FadeIn delay={0.15} y={40}>
-          <h1 className="chrome-text font-display w-full select-none whitespace-nowrap text-center text-[23.5vw] font-extrabold uppercase leading-[0.8] tracking-[-0.02em]">
+          <h1 className="chrome-text font-display w-full select-none whitespace-nowrap text-center text-[min(23.5vw,62svh)] font-extrabold uppercase leading-[0.8] tracking-[-0.02em]">
             Hi, I&rsquo;m {PROFILE.firstName}
           </h1>
         </FadeIn>
@@ -91,7 +91,7 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
         </FadeIn>
 
         <FadeIn delay={0.5} y={20} className="flex flex-col items-start gap-4 md:items-end">
-          <div className="flex items-center gap-2" role="group" aria-label="Change his hair colour">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Change his hair colour">
             <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Hair</span>
             {SWATCHES.map((s, i) => {
               const idx = i - 1;

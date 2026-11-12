@@ -119,6 +119,7 @@ export function Voice() {
   const [paused, setPaused] = useState(false); // intro paused by the user; other voices still work
   const run = useRef(0); // bumps on every start/stop so stale utterances are ignored
   const started = useRef(false);
+  const startedAt = useRef(0);
 
   silenced = muted;
 
@@ -132,7 +133,9 @@ export function Voice() {
     if (!canSpeak) return;
     if (silenced) return;
     speechSynthesis.cancel();
+    speechSynthesis.resume(); // Chrome can be left in a paused state, which would silence the intro
     const id = ++run.current;
+    startedAt.current = performance.now();
     started.current = true;
     introOn = true;
     setPaused(false);
@@ -256,6 +259,9 @@ export function Voice() {
       try { localStorage.setItem(KEY, '0'); } catch { /* ignore */ }
       start();
     } else if (speaking) {
+      // the first click anywhere on the page starts the intro (autoplay rule); if that very click
+      // landed on this button, don't let it count as "pause" too
+      if (performance.now() - startedAt.current < 800) return;
       stop();
       setPaused(true);
     } else if (paused) {

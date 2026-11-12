@@ -211,7 +211,7 @@ body {
   background: var(--accent);
 }
 @media (max-width: 639px) {
-  .portrait-hint { top: 76%; }
+  .portrait-hint { top: 4%; }
 }
 .portrait-hint.is-gone {
   opacity: 0;

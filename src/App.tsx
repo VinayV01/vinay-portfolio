@@ -1,6 +1,7 @@
 import { MotionConfig } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { Cursor } from './components/Cursor';
+import { Intro } from './components/Intro';
 import { Nav } from './components/Nav';
 import { Voice } from './components/Voice';
 import { startSmoothScroll } from './lib/scroll';
@@ -34,6 +35,7 @@ export default function App() {
       <a href="#about" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-mist focus:px-4 focus:py-2 focus:text-ink">
         Skip to content
       </a>
+      <Intro />
       <Nav />
       <div className="relative z-10 bg-ink" style={{ overflowX: 'clip' }}>
         <main>

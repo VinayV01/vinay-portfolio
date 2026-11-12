@@ -41,6 +41,7 @@ export function Skills() {
                     type="button"
                     data-cursor="hover"
                     aria-pressed={locked === g.id}
+                    data-voice={`These are my ${g.label.toLowerCase()} skills: ${g.items.join(", ")}.`}
                     onPointerEnter={(e) => e.pointerType === 'mouse' && setActive(g.id)}
                     onPointerLeave={() => setActive(null)}
                     onFocus={() => setActive(g.id)}

@@ -42,6 +42,20 @@ export const EXPRESSIONS = {
   wink: P({ lidL: 0.97, smile: 0.55, smirk: 0.4, browR: 0.35 }),
   crossed: P({ cross: 1, widen: 0.25, smile: -0.4 }),
   squint: P({ lidL: 0.45, lidR: 0.45, browL: -0.25, browR: -0.25, smirk: 0.3 }),
+  grin: P({ smile: 1.2, jaw: 0.35, lidL: 0.15, lidR: 0.15, browL: 0.15, browR: 0.15 }),
+  smug: P({ lidL: 0.4, lidR: 0.4, smirk: 1, smile: 0.25, browL: 0.35, browR: 0.05, roll: -0.06 }),
+  skeptical: P({ browL: 1, browR: -0.45, lidL: 0.1, lidR: 0.35, smile: -0.4, jaw: -0.3, smirk: -0.3, roll: 0.05 }),
+  thinking: P({ browL: 0.8, browR: -0.3, smirk: 0.5, smile: -0.5, jaw: -0.35, roll: 0.08, lidR: 0.2 }),
+  love: P({ smile: 0.85, lidL: 0.3, lidR: 0.3, browL: 0.5, browR: 0.5, inner: 0.5, jaw: 0.1, roll: 0.07 }),
+  shy: P({ smile: 0.4, lidL: 0.5, lidR: 0.5, browL: 0.3, browR: 0.3, inner: 0.6, roll: 0.1, smirk: 0.2 }),
+  proud: P({ lidL: 0.3, lidR: 0.3, smile: 0.7, browL: 0.4, browR: 0.4, roll: -0.05, jaw: -0.15 }),
+  mischief: P({ inner: -0.7, browL: 0.45, browR: 0.1, lidL: 0.25, lidR: 0.25, smirk: 1, smile: 0.6, roll: -0.06 }),
+  angry: P({ inner: -1, browL: -0.6, browR: -0.6, lidL: 0.3, lidR: 0.3, smile: -1.1, jaw: 0.25 }),
+  sad: P({ inner: 1, browL: 0.1, browR: 0.1, lidL: 0.4, lidR: 0.4, smile: -1.1, jaw: -0.2, roll: 0.05 }),
+  worried: P({ inner: 1, browL: 0.5, browR: 0.5, widen: 0.25, smile: -0.6, jaw: 0.15 }),
+  disgust: P({ lidL: 0.45, lidR: 0.45, inner: -0.4, browL: -0.2, browR: -0.2, smile: -1, smirk: 0.5, jaw: 0.1, roll: 0.05 }),
+  bored: P({ lidL: 0.62, lidR: 0.62, browL: -0.1, browR: -0.1, smile: -0.4, jaw: -0.3, roll: 0.04 }),
+  awe: P({ widen: 0.7, browL: 0.8, browR: 0.8, inner: 0.3, smile: 0.8, jaw: 0.5 }),
 } satisfies Record<string, Params>;
 
 export type ExprName = keyof typeof EXPRESSIONS;

@@ -41,12 +41,20 @@ type Step = {
   zzz?: boolean;
 };
 
-const ACT_ROTATION = ['shifty', 'curious', 'fly', 'wink', 'roll', 'doze', 'hair', 'tug', 'sneeze', 'wow'] as const;
+const ACT_ROTATION = [
+  'shifty', 'curious', 'fly', 'wink', 'roll', 'doze', 'hair', 'tug', 'sneeze', 'wow',
+  'ponder', 'smug', 'bashful', 'sulkAct', 'cheer',
+] as const;
 type ActName = (typeof ACT_ROTATION)[number];
-const HOVER: Record<string, ExprName> = { eyeL: 'wink', eyeR: 'playful', nose: 'crossed', mouth: 'happy' };
-const TAP: Record<string, ExprName | 'act:sneeze'> = {
-  brow: 'focused', eyeL: 'ouch', eyeR: 'ouch', nose: 'act:sneeze', mouth: 'playful', cheek: 'puff', chin: 'laugh', body: 'laugh',
+const HOVER: Record<string, ExprName> = { eyeL: 'wink', eyeR: 'playful', nose: 'crossed', mouth: 'grin', brow: 'skeptical', cheek: 'shy', chin: 'proud' };
+type TapReply = ExprName | 'act:sneeze';
+const TAP: Record<string, TapReply[]> = {
+  brow: ['focused', 'angry', 'skeptical'], eyeL: ['ouch', 'worried'], eyeR: ['ouch', 'disgust'], nose: ['act:sneeze', 'disgust', 'crossed'],
+  mouth: ['playful', 'mischief', 'grin'], cheek: ['puff', 'shy', 'love'], chin: ['laugh', 'smug', 'proud'], body: ['laugh', 'awe', 'grin'],
 };
+/** tells the rest of the page how the face just reacted (the voice answers with a small sound) */
+const react = (kind: string) => dispatchEvent(new CustomEvent('portrait-react', { detail: kind }));
+const pickOne = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 const KEYS = Object.keys(ZERO) as (keyof Params)[];
 const EMBER = '#FF5B1F';
 
@@ -135,6 +143,7 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
   let lastInput = -1e9, awake = false, pressed = false, downAt = 0, downZone: string | null = null, downX = 0, downY = 0;
   let lastX = 0, lastY = 0, speed = 0, shake = 0, hasPointer = false;
   let mood: ExprName | null = null, moodUntil = 0, pulls: number[] = [];
+  let talking = false, talkJaw = 0; // the voice is speaking: the face emotes and the mouth moves
   let actName = '', act: Step[] | null = null, actI = 0, actT = 0, rotation: ActName[] = [];
   let nextIdle = IDLE_MIN + Math.random() * IDLE_SPAN;
   let lookOverride: V2 | 'fly' | null = null, wantLean: V2 = [0, 0];
@@ -222,7 +231,24 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
         { e: 'squint', ms: 380 }, { e: 'sleepy', ms: 180 }, { e: 'ouch', ms: 520 },
         { e: 'ouch', ms: 300, jolt: [0, -2.6, 0], lean: [0, -0.06] }, { e: 'dizzy', ms: 650 }, { e: 'happy', ms: 650 },
       ];
-      case 'wow': return [{ e: 'surprised', ms: 900 }, { e: 'excited', ms: 800 }, { e: 'happy', ms: 500 }];
+      case 'wow': return [{ e: 'surprised', ms: 900 }, { e: 'awe', ms: 900 }, { e: 'excited', ms: 700 }, { e: 'happy', ms: 500 }];
+      case 'ponder': return [
+        { e: 'thinking', look: [0.8, -0.8], ms: 1300, lean: [0, 0.02] }, { e: 'skeptical', look: [-0.6, -0.5], ms: 900 },
+        { e: 'curious', look: [0.3, -0.2], ms: 600 }, { e: 'excited', look: [0, 0], ms: 700, jolt: [0, 0.8, 0] }, { e: 'grin', ms: 600 },
+      ];
+      case 'smug': return [
+        { e: 'smug', look: [0.6, 0.1], ms: 1300 }, { e: 'mischief', look: [-0.3, 0], ms: 900 }, { e: 'proud', look: [0, 0], ms: 1000 }, { e: 'happy', ms: 400 },
+      ];
+      case 'bashful': return [
+        { e: 'shy', look: [-0.8, 0.6], ms: 1200 }, { e: 'love', look: [0.2, 0.3], ms: 1100 }, { e: 'shy', look: [-0.6, 0.7], ms: 700 }, { e: 'happy', look: [0, 0], ms: 500 },
+      ];
+      case 'sulkAct': return [
+        { e: 'bored', look: [0, 0.3], ms: 1200 }, { e: 'sad', look: [0.2, 0.6], ms: 1200, lean: [0, -0.03] }, { e: 'worried', ms: 800 },
+        { e: 'angry', ms: 800, jolt: [0, -0.8, 0] }, { e: 'disgust', ms: 700 }, { e: 'happy', ms: 500 },
+      ];
+      case 'cheer': return [
+        { e: 'grin', ms: 700 }, { e: 'laugh', ms: 1000, jolt: [0, 1.2, 0] }, { e: 'proud', ms: 900 }, { e: 'love', ms: 800 }, { e: 'happy', ms: 400 },
+      ];
       case 'fly': {
         flyPos = flyFrom = [1.35, 0.02]; flyTo = flyPos; fly.style.opacity = '1';
         const hop = (u: number, v: number, ms: number): Step => ({ look: 'fly', ms, call: moveFly([u, v], ms * 0.9) });
@@ -314,11 +340,13 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
     pulls = pulls.filter((t) => now - t < 14000);
     if (L < 0.05 && held < 380) { // a tap
       if (z === 'hair') {
+        react('hair');
         hairI = hairI + 1 >= HAIR.length ? -1 : hairI + 1;
         showHair(hairI, now); opt.onHair?.(hairI);
         pullVel.y += 1.4;
       } else {
-        const r = TAP[z] ?? 'happy';
+        const r = TAP[z] ? pickOne(TAP[z]) : 'happy';
+        react(r === 'act:sneeze' ? 'sneeze' : r);
         if (r === 'act:sneeze') startAct('sneeze', now);
         else { mood = r; moodUntil = now + 1200; }
         pullVel.y -= 1.2;
@@ -327,7 +355,8 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
     }
     pulls.push(now);
     const n = pulls.length;
-    mood = n >= 8 ? 'sulk' : n >= 5 ? 'focused' : L > 0.36 ? 'dizzy' : L > 0.18 ? 'squint' : 'neutral';
+    mood = n >= 8 ? 'sulk' : n >= 5 ? 'angry' : L > 0.36 ? 'dizzy' : L > 0.18 ? 'squint' : 'neutral';
+    if (mood !== 'neutral') react(`pull-${mood}`);
     moodUntil = now + (n >= 5 ? 2600 : 700 + L * 2000);
   };
   const onLeave = () => { zone = null; onHead = false; };
@@ -349,7 +378,21 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
     mood = 'happy'; moodUntil = performance.now() + 900; hearts = false;
   };
   const onVis = () => { last = performance.now(); };
+  // the voice tells the face what it feels, and when its mouth should move
+  const onExpress = (e: Event) => {
+    const d = (e as CustomEvent<{ expr: string; ms: number }>).detail;
+    if (!d || !(d.expr in EXPRESSIONS)) return;
+    const now = performance.now();
+    wake(now); endAct();
+    mood = d.expr as ExprName; moodUntil = now + (d.ms || 3000);
+  };
+  const onTalk = (e: Event) => {
+    talking = !!(e as CustomEvent<boolean>).detail;
+    if (talking) wake(performance.now());
+  };
 
+  addEventListener('voice-express', onExpress);
+  addEventListener('voice-talk', onTalk);
   addEventListener('pointermove', onMove, { passive: true });
   wrap.addEventListener('pointerdown', onDown);
   addEventListener('pointerup', release);
@@ -433,6 +476,9 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
     const target = EXPRESSIONS[want];
     const rate = pressed ? 22 : 12;
     for (const k of KEYS) cur[k] += (target[k] - cur[k]) * f(rate);
+    // lip movement while speaking: uneven open/close like syllables
+    const jawWant = talking ? 0.2 + 0.55 * Math.abs(Math.sin(now * 0.017)) * (0.65 + 0.35 * Math.sin(now * 0.0061 + 1)) : 0;
+    talkJaw += (jawWant - talkJaw) * f(talking ? 24 : 12);
 
     // lids
     let lidExtra = awake ? 0 : 1;
@@ -521,12 +567,12 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
       b.position.set(rig.browBase[i].x - s * Math.max(0, -cur.inner) * 0.025, rig.browBase[i].y + lift * 0.065 - Math.max(0, -cur.inner) * 0.02, rig.browBase[i].z);
       b.rotation.z = -s * cur.inner * 0.3;
     });
-    const open = Math.min(1.15, Math.max(0.03, 0.5 + cur.jaw * 0.55 + Math.min(0, cur.smile) * 0.3));
+    const open = Math.min(1.15, Math.max(0.03, 0.5 + (cur.jaw + talkJaw) * 0.55 + Math.min(0, cur.smile) * 0.3));
     const sm = Math.min(1.2, Math.max(-0.9, 0.6 + cur.smile * 0.6));
     if (Math.abs(open - lastMouth[0]) + Math.abs(sm - lastMouth[1]) + Math.abs(cur.smirk - lastMouth[2]) > 0.004) {
       rig.setMouth(open, sm, cur.smirk); lastMouth = [open, sm, cur.smirk];
     }
-    DEFORM.uJaw.value = Math.max(0, cur.jaw) * 0.8;
+    DEFORM.uJaw.value = Math.max(0, cur.jaw + talkJaw) * 0.8;
     DEFORM.uPuff.value = cur.puff;
 
     rig.root.updateMatrixWorld(true);
@@ -612,6 +658,8 @@ export function createCharacter(el: PortraitElements, opt: PortraitOptions): Por
   const destroy = () => {
     cancelAnimationFrame(raf);
     clearTimeout(wakeTimer);
+    removeEventListener('voice-express', onExpress);
+    removeEventListener('voice-talk', onTalk);
     removeEventListener('pointermove', onMove);
     wrap.removeEventListener('pointerdown', onDown);
     removeEventListener('pointerup', release);

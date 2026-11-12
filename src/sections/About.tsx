@@ -5,7 +5,7 @@ import { Label } from '../components/ui';
 
 export function About() {
   return (
-    <section id="about" className="gutter relative py-24 sm:py-32 md:py-40" aria-labelledby="about-title">
+    <section id="about" className="gutter relative pb-24 pt-14 sm:pb-32 sm:pt-20 md:pb-40 md:pt-24" aria-labelledby="about-title">
       <div className="mx-auto max-w-[1400px]">
         <FadeIn><Label n="01" className="text-muted">About</Label></FadeIn>
         <h2 id="about-title" className="sr-only">About Vinay</h2>

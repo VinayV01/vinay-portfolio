@@ -1,5 +1,17 @@
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
+
+// d = scroll direction: 1 forward, -1 back — content travels the way you scroll
+const yearV = {
+  enter: (d: number) => ({ y: `${d * 100}%`, opacity: 0 }),
+  center: { y: '0%', opacity: 1 },
+  exit: (d: number) => ({ y: `${d * -100}%`, opacity: 0 }),
+};
+const cardV = {
+  enter: (d: number) => ({ y: d * 24, opacity: 0 }),
+  center: { y: 0, opacity: 1 },
+  exit: (d: number) => ({ y: d * -24, opacity: 0 }),
+};
 import { CERTIFICATIONS, JOURNEY } from '../data/content';
 import { FadeIn } from '../components/motion';
 import { Label } from '../components/ui';
@@ -8,7 +20,13 @@ export function Journey() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
   const [i, setI] = useState(0);
-  useMotionValueEvent(scrollYProgress, 'change', (v) => setI(Math.min(JOURNEY.length - 1, Math.max(0, Math.floor(v * JOURNEY.length * 0.999)))));
+  const [dir, setDir] = useState(1);
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    const next = Math.min(JOURNEY.length - 1, Math.max(0, Math.floor(v * JOURNEY.length * 0.999)));
+    if (next === i) return;
+    setDir(next > i ? 1 : -1);
+    setI(next);
+  });
   const glowX = useTransform(scrollYProgress, [0, 1], ['15%', '85%']);
   const m = JOURNEY[i];
 
@@ -38,12 +56,14 @@ export function Journey() {
 
           <div className="gutter relative grid flex-1 items-center gap-6 md:grid-cols-[1.35fr_1fr] md:gap-10">
             <div className="relative overflow-hidden" aria-hidden="true">
-              <AnimatePresence mode="popLayout" initial={false}>
+              <AnimatePresence mode="popLayout" initial={false} custom={dir}>
                 <motion.div
                   key={m.year}
-                  initial={{ y: '100%', opacity: 0 }}
-                  animate={{ y: '0%', opacity: 1 }}
-                  exit={{ y: '-100%', opacity: 0 }}
+                  custom={dir}
+                  variants={yearV}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
                   transition={{ duration: 0.75, ease: [0.7, 0, 0.2, 1] }}
                   className="chrome-text font-display text-[clamp(7rem,27vw,26rem)] font-extrabold leading-[0.78] tracking-[-0.04em]"
                 >
@@ -52,12 +72,14 @@ export function Journey() {
               </AnimatePresence>
             </div>
             <div className="relative min-h-[220px]" aria-live="polite">
-              <AnimatePresence mode="wait" initial={false}>
+              <AnimatePresence mode="wait" initial={false} custom={dir}>
                 <motion.div
                   key={m.year}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -24 }}
+                  custom={dir}
+                  variants={cardV}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
                   transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                   <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:var(--accent)]">

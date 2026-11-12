@@ -44,7 +44,6 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const headY = useTransform(scrollYProgress, [0, 1], ['0%', '-45%']);
   const headO = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const barY = useTransform(scrollYProgress, [0, 1], ['0%', '60%']);
   const portraitS = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
   const portraitY = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
 
@@ -81,7 +80,7 @@ export function Hero({ onHair, hair }: { onHair: (i: number) => void; hair: numb
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[34%] bg-gradient-to-t from-ink via-ink/70 to-transparent" />
 
       {/* bottom bar */}
-      <motion.div style={{ y: barY }} className="gutter relative z-20 mt-auto flex flex-col gap-6 pb-7 sm:pb-9 md:flex-row md:items-end md:justify-between md:pb-10">
+      <motion.div className="gutter relative z-20 mt-auto flex flex-col gap-6 pb-7 sm:pb-9 md:flex-row md:items-end md:justify-between md:pb-10">
         <FadeIn delay={0.35} y={20} className="max-w-[640px]">
           <p className="font-serif text-[clamp(1.35rem,2.3vw,2.2rem)] italic leading-tight text-white">
             <RotatingLine />

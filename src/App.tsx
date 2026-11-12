@@ -2,6 +2,7 @@ import { MotionConfig } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { Cursor } from './components/Cursor';
 import { Nav } from './components/Nav';
+import { Voice } from './components/Voice';
 import { startSmoothScroll } from './lib/scroll';
 import { HAIR } from './portrait/face';
 import { About } from './sections/About';
@@ -48,6 +49,7 @@ export default function App() {
         </main>
       </div>
       <Footer />
+      <Voice />
       <Cursor />
       <div className="grain" aria-hidden="true" />
     </MotionConfig>
